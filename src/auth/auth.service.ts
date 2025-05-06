@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common'
+import { Request } from 'express'
 
-import { AuthMethod } from '../../generated/prisma'
+import { AuthMethod, User } from '../../generated/prisma'
 import { UserService } from '../user/user.service'
 
 import { RegisterDto } from './dto/register.dto'
@@ -8,7 +9,7 @@ import { RegisterDto } from './dto/register.dto'
 @Injectable()
 export class AuthService {
 	constructor(private readonly userService: UserService) {}
-	async register(dto: RegisterDto) {
+	async register(req: Request, dto: RegisterDto) {
 		const isExists = await this.userService.findByEmail(dto.email)
 
 		if (isExists) {
@@ -24,7 +25,7 @@ export class AuthService {
 			false
 		)
 
-		await this.saveSession(newUser)
+		await this.saveSession(req, newUser)
 		return newUser
 	}
 
@@ -32,7 +33,7 @@ export class AuthService {
 
 	async logout() {}
 
-	private async saveSession(user: any) {
+	private async saveSession(req: Request, user: User) {
 		console.log('Session saved with user:', user)
 	}
 }
