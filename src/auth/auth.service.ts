@@ -1,13 +1,15 @@
 import {
 	ConflictException,
 	Injectable,
-	InternalServerErrorException
+	InternalServerErrorException,
+	NotFoundException
 } from '@nestjs/common'
 import { Request } from 'express'
 
 import { AuthMethod, User } from '../../generated/prisma'
 import { UserService } from '../user/user.service'
 
+import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 
 @Injectable()
@@ -32,7 +34,13 @@ export class AuthService {
 		return this.saveSession(req, newUser)
 	}
 
-	async login() {}
+	async login(req: Request, dto: LoginDto) {
+		const user = await this.userService.findByEmail(dto.email)
+
+		if (!user) {
+			throw new NotFoundException('User not found')
+		}
+	}
 
 	async logout() {}
 
