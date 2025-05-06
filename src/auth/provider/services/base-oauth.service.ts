@@ -9,7 +9,25 @@ export class BaseOauthService {
 
 	constructor(private readonly options: TypeBaseProviderOptions) {}
 
-	protected extractUserInfo(): Promise<TypeUserInfo> {}
+	protected extractUserInfo(data: any): Promise<TypeUserInfo> {
+		return {
+			...data,
+			provider: this.options.name
+		}
+	}
+
+	getAuthUrl(): string {
+		const query = new URLSearchParams({
+			response_type: 'code',
+			client_id: this.options.client_id,
+			redirect_uri: this.getRedirectUrl(),
+			scope: (this.options.scopes ?? []).join(' '),
+			access_type: 'offline',
+			prompt: 'select_account'
+		})
+
+		return `${this.options.authorize_url}?${query}`
+	}
 
 	getRedirectUrl(): string {
 		return `${this.BASE_URL}/auth/oauth/callback/${this.options.name}`
