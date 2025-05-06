@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common'
+import {
+	ConflictException,
+	Injectable,
+	InternalServerErrorException
+} from '@nestjs/common'
 import { Request } from 'express'
 
 import { AuthMethod, User } from '../../generated/prisma'
@@ -25,8 +29,7 @@ export class AuthService {
 			false
 		)
 
-		await this.saveSession(req, newUser)
-		return newUser
+		return this.saveSession(req, newUser)
 	}
 
 	async login() {}
@@ -34,6 +37,18 @@ export class AuthService {
 	async logout() {}
 
 	private async saveSession(req: Request, user: User) {
-		console.log('Session saved with user:', user)
+		return new Promise((resolve, reject) => {
+			req.session.userId = user.id
+
+			req.session.save(err => {
+				if (err) {
+					return reject(
+						new InternalServerErrorException('Unable to save session')
+					)
+				}
+
+				resolve({ user })
+			})
+		})
 	}
 }
