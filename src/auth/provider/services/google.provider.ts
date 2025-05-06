@@ -15,7 +15,13 @@ export class GoogleProvider extends BaseOauthService {
 		})
 	}
 
-	async extractUserInfo(data: GoogleProfile): Promise<TypeUserInfo> {}
+	async extractUserInfo(data: GoogleProfile): Promise<TypeUserInfo> {
+		return super.extractUserInfo({
+			email: data.email,
+			name: data.name,
+			picture: data.picture
+		})
+	}
 }
 
 interface GoogleProfile extends Record<string, any> {
