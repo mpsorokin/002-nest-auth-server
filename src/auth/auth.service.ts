@@ -2,8 +2,10 @@ import {
 	ConflictException,
 	Injectable,
 	InternalServerErrorException,
-	NotFoundException
+	NotFoundException,
+	UnauthorizedException
 } from '@nestjs/common'
+import { verify } from 'argon2'
 import { Request } from 'express'
 
 import { AuthMethod, User } from '../../generated/prisma'
@@ -39,6 +41,12 @@ export class AuthService {
 
 		if (!user) {
 			throw new NotFoundException('User not found')
+		}
+
+		const isValidPassword = await verify(user.password, dto.password)
+
+		if (!isValidPassword) {
+			throw new UnauthorizedException('Incorrect password')
 		}
 	}
 
