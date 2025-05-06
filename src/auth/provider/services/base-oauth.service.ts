@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common'
 
 import { TypeBaseProviderOptions } from './types/base-provider.options.types'
+import { TypeUserInfo } from './types/user-info.types'
 
 @Injectable()
 export class BaseOauthService {
 	private BASE_URL: string = ''
 
 	constructor(private readonly options: TypeBaseProviderOptions) {}
+
+	protected extractUserInfo(): Promise<TypeUserInfo> {}
 
 	getRedirectUrl(): string {
 		return `${this.BASE_URL}/auth/oauth/callback/${this.options.name}`

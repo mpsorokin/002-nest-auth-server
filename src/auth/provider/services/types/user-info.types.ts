@@ -1,4 +1,4 @@
-export type TypedUserInfo = {
+export type TypeUserInfo = {
 	id: string
 	picture: string
 	name: string
