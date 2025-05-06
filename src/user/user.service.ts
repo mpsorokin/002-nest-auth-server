@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import { hash } from 'argon2'
 
+import { AuthMethod } from '../../generated/prisma'
 import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
@@ -32,5 +34,28 @@ export class UserService {
 		return user
 	}
 
-	async create() {}
+	async create(
+		email: string,
+		password: string,
+		displayName: string,
+		picture: string,
+		method: AuthMethod,
+		isVerified: boolean
+	) {
+		const user = await this.prismaService.user.create({
+			data: {
+				email,
+				password: password ? await hash(password) : '',
+				displayName,
+				picture,
+				method,
+				isVerified
+			},
+			include: {
+				accounts: true
+			}
+		})
+
+		return user
+	}
 }
