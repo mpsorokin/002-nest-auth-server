@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
+import { RedisStore } from 'connect-redis'
 import * as cookieParser from 'cookie-parser'
 import * as session from 'express-session'
 import IORedis from 'ioredis'
@@ -27,8 +28,13 @@ async function bootstrap() {
 				domain: config.getOrThrow<string>('SESSION_DOMAIN'),
 				maxAge: 30 * 24 * 60 * 60,
 				httpOnly: false,
-				secure: false
-			}
+				secure: false,
+				sameSite: 'lax'
+			},
+			store: new RedisStore({
+				client: redis,
+				prefix: config.getOrThrow<string>('SESSION_FOLDER')
+			})
 		})
 	)
 
