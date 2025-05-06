@@ -29,6 +29,25 @@ export class BaseOauthService {
 		return `${this.options.authorize_url}?${query}`
 	}
 
+	async findUserByCode(code: string): Promise<TypeUserInfo> {
+		const { client_id, client_secret } = this.options
+
+		const tokenQuery = new URLSearchParams({
+			client_id,
+			client_secret,
+			redirect_uri: this.getRedirectUrl(),
+			grant_type: 'authorization_code'
+		})
+
+		const tokenRequest = await fetch(this.options.access_url, {
+			method: 'POST',
+			body: tokenQuery,
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+		})
+	}
+
 	getRedirectUrl(): string {
 		return `${this.BASE_URL}/auth/oauth/callback/${this.options.name}`
 	}
