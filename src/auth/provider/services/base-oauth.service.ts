@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import {
+	BadRequestException,
+	Injectable,
+	UnauthorizedException
+} from '@nestjs/common'
 
 import { TypeBaseProviderOptions } from './types/base-provider.options.types'
 import { TypeUserInfo } from './types/user-info.types'
@@ -43,9 +47,46 @@ export class BaseOauthService {
 			method: 'POST',
 			body: tokenQuery,
 			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+				'Content-Type': 'application/x-www-form-urlencoded',
+				Accept: 'application/json'
 			}
 		})
+
+		const tokenResponse = await tokenRequest.json()
+
+		if (!tokenRequest.ok) {
+			throw new BadRequestException(
+				`Unable to get user from ${this.options.profile_url}`
+			)
+		}
+
+		if (!tokenResponse.access_token) {
+			throw new BadRequestException(`No tokens for ${this.options.access_url}`)
+		}
+
+		const userRequest = await fetch(this.options.profile_url, {
+			headers: {
+				Authorization: `Bearer ${tokenResponse.access_token}`
+			}
+		})
+
+		if (!userRequest.ok) {
+			throw new UnauthorizedException(
+				`Unable to get user from ${this.options.profile_url}`
+			)
+		}
+
+		const user = await userRequest.json()
+
+		const userData = await this.extractUserInfo(user)
+
+		return {
+			...userData,
+			access_token: tokenResponse.access_token,
+			refresh_token: tokenResponse.refresh_token,
+			expires_at: tokenResponse.expires_at || tokenResponse.expires_in,
+			provider: this.options.name
+		}
 	}
 
 	getRedirectUrl(): string {
