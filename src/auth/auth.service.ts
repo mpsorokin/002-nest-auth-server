@@ -5,8 +5,9 @@ import {
 	NotFoundException,
 	UnauthorizedException
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { verify } from 'argon2'
-import { Request } from 'express'
+import { Request, Response } from 'express'
 
 import { AuthMethod, User } from '../../generated/prisma'
 import { UserService } from '../user/user.service'
@@ -16,7 +17,10 @@ import { RegisterDto } from './dto/register.dto'
 
 @Injectable()
 export class AuthService {
-	constructor(private readonly userService: UserService) {}
+	constructor(
+		private readonly userService: UserService,
+		private readonly configService: ConfigService
+	) {}
 	async register(req: Request, dto: RegisterDto) {
 		const isExists = await this.userService.findByEmail(dto.email)
 
@@ -48,9 +52,23 @@ export class AuthService {
 		if (!isValidPassword) {
 			throw new UnauthorizedException('Incorrect password')
 		}
+
+		return this.saveSession(req, user)
 	}
 
-	async logout() {}
+	async logout(req: Request, res: Response): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			req.session.destroy(err => {
+				if (err) {
+					return reject(
+						new InternalServerErrorException('Unable to delete session')
+					)
+				}
+
+				res.clearCookie(this.configService.getOrThrow<string>('SESSION_NAME'))
+			})
+		})
+	}
 
 	private async saveSession(req: Request, user: User) {
 		return new Promise((resolve, reject) => {
