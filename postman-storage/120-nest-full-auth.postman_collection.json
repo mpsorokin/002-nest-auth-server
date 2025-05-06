@@ -1,0 +1,42 @@
+{
+	"info": {
+		"_postman_id": "0977b01b-2373-4205-9136-99fe17c46eb4",
+		"name": "120-nest-full-auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32381371"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"user03\",\r\n    \"email\": \"test03@mail.com\",\r\n    \"password\": \"123456\",\r\n    \"passwordRepeat\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_URL}}/auth/register",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

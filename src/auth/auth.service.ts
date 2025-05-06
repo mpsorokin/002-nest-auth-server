@@ -24,6 +24,7 @@ export class AuthService {
 			false
 		)
 
+		await this.saveSession(newUser)
 		return newUser
 	}
 
@@ -31,5 +32,7 @@ export class AuthService {
 
 	async logout() {}
 
-	private async saveSession() {}
+	private async saveSession(user: any) {
+		console.log('Session saved with user:', user)
+	}
 }
