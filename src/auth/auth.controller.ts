@@ -53,8 +53,14 @@ export class AuthController {
 		@Query('code') code: string
 	) {
 		if (!code) {
-			throw new BadRequestException()
+			throw new BadRequestException('No auth code')
 		}
+
+		await this.authService.extractProfileFromCode(req, provider, code)
+
+		return res.redirect(
+			`${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/dashboard/settings`
+		)
 	}
 
 	@UseGuards(AuthProviderGuard)
