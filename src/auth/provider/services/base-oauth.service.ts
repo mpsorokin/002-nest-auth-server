@@ -39,6 +39,7 @@ export class BaseOauthService {
 		const tokenQuery = new URLSearchParams({
 			client_id,
 			client_secret,
+			code,
 			redirect_uri: this.getRedirectUrl(),
 			grant_type: 'authorization_code'
 		})
@@ -52,21 +53,21 @@ export class BaseOauthService {
 			}
 		})
 
-		const tokenResponse = await tokenRequest.json()
-
 		if (!tokenRequest.ok) {
 			throw new BadRequestException(
 				`Unable to get user from ${this.options.profile_url}`
 			)
 		}
 
-		if (!tokenResponse.access_token) {
+		const tokens = await tokenRequest.json()
+
+		if (!tokens.access_token) {
 			throw new BadRequestException(`No tokens for ${this.options.access_url}`)
 		}
 
 		const userRequest = await fetch(this.options.profile_url, {
 			headers: {
-				Authorization: `Bearer ${tokenResponse.access_token}`
+				Authorization: `Bearer ${tokens.access_token}`
 			}
 		})
 
@@ -82,9 +83,9 @@ export class BaseOauthService {
 
 		return {
 			...userData,
-			access_token: tokenResponse.access_token,
-			refresh_token: tokenResponse.refresh_token,
-			expires_at: tokenResponse.expires_at || tokenResponse.expires_in,
+			access_token: tokens.access_token,
+			refresh_token: tokens.refresh_token,
+			expires_at: tokens.expires_at || tokens.expires_in,
 			provider: this.options.name
 		}
 	}
